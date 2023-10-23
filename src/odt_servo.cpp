@@ -6,11 +6,11 @@
 static ReferencePath refs[8] = {ReferencePath(), ReferencePath(), ReferencePath(), ReferencePath(), ReferencePath(), ReferencePath(), ReferencePath(), ReferencePath()};
 
 static PIController
-    servo326{[]() { return (double)read_ain0(); },
+    servo_odt{[]() { return (double)read_ain0(); },
              [](double x) { write(4, x); },
-             {-1 / 6.},
+             {-1 / 8.},
              {0., -1 / 2.},
-             -0.008,
+             -0.002,
              0.,     // min output DAC number
              1500.,  // max output DAC number
              &refs[0],
@@ -19,4 +19,4 @@ static PIController
 
 // overwrite the weak symbols 
 extern pController
-    pc0 = &servo326;
+    pc0 = &servo_odt;
