@@ -6,25 +6,42 @@
 
 // first order IIR controller base class
 struct IIRBaseController {
-    double le, lo;  // last error and last output
+    float le, lo;  // last error and last output
     IIRBaseController() : le{}, lo{} {}
     void clear() {
-        le = 0;
-        lo = 0;
+        // clear last error and output
+        le = 0.f;
+        lo = 0.f;
     }
-    virtual double transfer(double const err) = 0;
+    virtual float transfer(float const err) = 0;
     virtual void show() = 0;
     virtual ~IIRBaseController(){};
 };
 
 // first order IIR controller with zero and pole
 struct IIRFirstOrderController : public IIRBaseController {
-    double const z, p;
-    IIRFirstOrderController(double const z, double const p) : z(z), p(p) {}
-    double transfer(double const e) override {
-        double ret =
-            ((1 + M_PI * p) * lo - (1 + M_PI * z) * le + (1 - M_PI * z) * e) /
-            (1 - M_PI * p);
+    float a, b, c;
+    double z, p;
+    IIRFirstOrderController(float const z, float const p)
+        : a((1 + M_PI * p) / (1 - M_PI * p)),
+          b((1 + M_PI * z) / (1 - M_PI * z)),
+          c((1 - M_PI * z) / (1 - M_PI * p)),
+          z(z),
+          p(p) {}
+    IIRFirstOrderController(IIRFirstOrderController const& old) = default;
+    IIRFirstOrderController(IIRFirstOrderController&& old) = default;
+
+    IIRFirstOrderController& operator=(const IIRFirstOrderController& old) {
+        z = old.z;
+        p = old.p;
+        a = old.a;
+        b = old.b;
+        c = old.c;
+        return *this;
+    }
+    IIRFirstOrderController() : z(0), p(0) {}
+    float transfer(float const e) override {
+        float ret = (a * lo - b * le + e);
         lo = ret;
         le = e;
         return ret;
@@ -34,10 +51,22 @@ struct IIRFirstOrderController : public IIRBaseController {
 
 // first order IIR controller with only pole
 struct IIRSinglePoleController : public IIRBaseController {
-    double const p;
-    IIRSinglePoleController(double const p) : p(p) {}
-    double transfer(double const e) override {
-        double ret = ((1 + M_PI * p) * lo + M_PI * (le + e)) / (1 - M_PI * p);
+    float a, b;
+    double p;
+    IIRSinglePoleController(double const p)
+        : a(M_PI / (1 - M_PI * p)), b((1 + M_PI * p) / (1 - M_PI * p)), p(p) {}
+    IIRSinglePoleController() : p(0) {}
+
+    IIRSinglePoleController(IIRSinglePoleController const&) = default;
+    IIRSinglePoleController(IIRSinglePoleController&&) = default;
+    IIRSinglePoleController& operator=(IIRSinglePoleController const& rhs) {
+        p = rhs.p;
+        a = rhs.a;
+        b = rhs.b;
+        return *this;
+    }
+    float transfer(float const e) override {
+        float ret = (b * lo + (le + e));
         lo = ret;
         le = e;
         return ret;
@@ -52,10 +81,11 @@ struct IIRCascadeController : public Controller {
                       (len_zeroes < len_poles),
                   "There should be more poles than zeroes. ");
 
-    double overall_gain;
-    double last_out;
-    std::vector<IIRBaseController*> controllers;
-
+    float overall_gain;
+    float last_out;
+    float real_g;
+    IIRFirstOrderController focontrollers[len_zeroes];
+    IIRSinglePoleController spcontrollers[len_poles - len_zeroes];
     IIRCascadeController(read_func_t reader, write_func_t writer,
                          double const (&zeroes)[len_zeroes],
                          double const (&poles)[len_poles],
@@ -65,31 +95,40 @@ struct IIRCascadeController : public Controller {
         : Controller(reader, writer, reference, reference_hsp, lower, upper),
           overall_gain(overall_gain),
           last_out(0.) {
-        int i = 0;
-        for (; i < len_zeroes; ++i)
-            controllers.push_back(
-                new IIRFirstOrderController(zeroes[i], poles[i]));
-        for (; i < len_poles; ++i)
-            controllers.push_back(new IIRSinglePoleController(poles[i]));
-    }
-
-    void update() override {
-        double new_out =
-            reader() - reference->get_reference();  // start with an error
-
-        for (auto p : controllers) new_out = p->transfer(new_out);
-        new_out = max(min(overall_gain * new_out, upper), lower);
-        if (fabs(new_out - last_out) > 1.)  // lazy update
-        {
-            writer(int(new_out));
-            last_out = (int)new_out;
+        int i = 0, j = 0;
+        real_g = overall_gain;
+        for (; i < len_zeroes; ++i) {
+            focontrollers[i] = IIRFirstOrderController(zeroes[i], poles[i]);
+            real_g *= focontrollers[i].a;
+        }
+        for (; i < len_poles; ++i, ++j) {
+            spcontrollers[j] = IIRSinglePoleController(poles[i]);
+            real_g *= spcontrollers[j].a;
         }
     }
 
-    void clear() {
-        int i = 0;
-        for (; i < len_zeroes; ++i) controllers[i]->clear();
-        for (; i < len_poles; ++i) controllers[i]->clear();
+    void update() override {
+        float new_out =
+            reader() - reference->get_reference();  // start with an error
+        int i = 0, j = 0;
+        for (; i < len_zeroes; ++i) {
+            new_out = focontrollers[i].transfer(new_out);
+        }
+        for (; i < len_poles; ++i, ++j) {
+            new_out = spcontrollers[j].transfer(new_out);
+        }
+        new_out = max(min(real_g * new_out, upper), lower);
+        if (fabs(new_out - last_out) > 1.f)  // lazy update
+        {
+            last_out = new_out;
+            writer((uint16_t)last_out);
+        }
+    }
+
+    void clear() override {
+        int i = 0, j = 0;
+        for (; i < len_zeroes; ++i) focontrollers[i].clear();
+        for (; i < len_poles; ++i, ++j) spcontrollers[j].clear();
     }
 
     void read_from_serial(uint8_t const) override;
@@ -97,8 +136,8 @@ struct IIRCascadeController : public Controller {
 
 template <int a, int b>
 void sweep_parser(IIRCascadeController<a, b>* c) {
-    c->lower = (int16_t)SerialReader();
-    c->upper = (int16_t)SerialReader();
+    c->lower = (uint16_t)SerialReader();
+    c->upper = (uint16_t)SerialReader();
     uint16_t step = SerialReader();
     auto gp = get_best_power(c, step);
     Serial.printf("Max power of %d at DAC number %d.\n", gp.pmax, gp.vmax);
@@ -109,36 +148,40 @@ template <int a, int b>
 void show_parser(IIRCascadeController<a, b>* c) {
     Serial.printf("Lower: %.0f; Upper %.0f\n", c->lower, c->upper);
     Serial.printf("Overall gain: %.3e\n", c->overall_gain);
-    int i = 0;
     Serial.printf("First order controller:\n");
-    while (i < a) {
+    int i = 0, j = 0;
+    for (; i < a; ++i) {
         Serial.printf(">>> ");
-        c->controllers[i++]->show();
+        c->focontrollers[i].show();
     }
     Serial.printf("Single pole controller:\n");
-    while (i < b) {
+    for (; i < b; ++i, ++j) {
         Serial.printf(">>> ");
-        c->controllers[i++]->show();
+        c->spcontrollers[j].show();
     }
 }
 
 template <int a, int b>
 void servo_parser(IIRCascadeController<a, b>* c) {
-    int i = 0;
-    while (i < a) {
-        delete c->controllers[i];
+    int i = 0, j = 0;
+    c->real_g = 1;
+    for (; i < a; ++i) {
         double z = SerialReader();
         double p = SerialReader();  // no guarantee that p is 0
-        c->controllers[i++] = new IIRFirstOrderController(z, p);
+        c->focontrollers[i] = IIRFirstOrderController(z, p);
+        c->real_g *= c->focontrollers[i].a;
     }
     // last controller is always a single pole at -1/2
-    while ((i + 1) < b) {
-        delete c->controllers[i];
+    for (; i < (b - 1); ++i, ++j) {
         double p = SerialReader();
-        c->controllers[i++] = new IIRSinglePoleController(p);
+        c->spcontrollers[j] = IIRSinglePoleController(p);
+        c->real_g *= c->spcontrollers[j].a;
     }
+    c->real_g *= c->spcontrollers[j].a;
     // new overall gain
-    c->overall_gain = SerialReader();
+    c->overall_gain = (double)SerialReader();
+    Serial.printf("overall_gain %f\n", c->overall_gain);
+    c->real_g *= c->overall_gain;
 }
 
 template <int a, int b>
@@ -149,7 +192,6 @@ void ref_parser(IIRCascadeController<a, b>* c) {
     // clear everything
     c->reference->clear_reference();
     c->reference->clear_timer();
-    c->clear();
     // turn on the controller
     c->on = true;
 }
@@ -210,6 +252,7 @@ IIRCascadeController<len_zeroes, len_poles> make_iir_cascade_controller(
 }
 using PIController = IIRCascadeController<1, 2>;
 using PIDController = IIRCascadeController<2, 3>;
+using PI2DController = IIRCascadeController<3, 4>;
 using ConstantController = IIRCascadeController<0, 0>;
 
 #endif

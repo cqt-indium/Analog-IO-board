@@ -10,7 +10,7 @@ static PIController
              [](double x) { write(4, x); },
              {-1 / 8.},
              {0., -1 / 2.},
-             -0.002,
+             -0.0005,
              0.,     // min output DAC number
              1500.,  // max output DAC number
              &refs[0],

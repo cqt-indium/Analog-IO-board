@@ -8,13 +8,13 @@
 #ifndef CONTROLLER_HPP
 #define CONTROLLER_HPP
 
+#include "is_int.hpp"
+#include "reference.hpp"
+#include "serial_reader.hpp"
 #include <Arduino.h>
 #include <cmath>
 #include <cstring>
 #include <vector>
-#include "is_int.hpp"
-#include "reference.hpp"
-#include "serial_reader.hpp"
 
 struct Controller;
 
@@ -29,7 +29,8 @@ typedef double (*read_func_t)();
 typedef void (*write_func_t)(double);
 
 // controller base class
-struct Controller {
+struct Controller
+{
     bool on;
     // uint16_t hold_output;
     read_func_t reader;
@@ -49,9 +50,10 @@ struct Controller {
           upper(upper) {}
     virtual void update()                        = 0;
     virtual void read_from_serial(uint8_t const) = 0;
+    virtual void clear()                         = 0;
     virtual ~Controller(){};
 };
 
 typedef Controller* const pController;
 
-#endif  // CONTROLLER_HPP
+#endif // CONTROLLER_HPP

@@ -13,5 +13,5 @@ void setup() {
 }
 
 void loop() {  
-   state_machine_loop();
+   fsm_loop();
 }
