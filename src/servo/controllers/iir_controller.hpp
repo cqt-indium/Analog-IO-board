@@ -164,20 +164,22 @@ void show_parser(IIRCascadeController<a, b>* c) {
 template <int a, int b>
 void servo_parser(IIRCascadeController<a, b>* c) {
     int i = 0, j = 0;
-    c->real_g = 1;
-    for (; i < a; ++i) {
-        double z = SerialReader();
-        double p = SerialReader();  // no guarantee that p is 0
-        c->focontrollers[i] = IIRFirstOrderController(z, p);
-        c->real_g *= c->focontrollers[i].a;
-    }
-    // last controller is always a single pole at -1/2
-    for (; i < (b - 1); ++i, ++j) {
-        double p = SerialReader();
-        c->spcontrollers[j] = IIRSinglePoleController(p);
+    if (a > 0 || b > 0){
+        c->real_g = 1;
+        for (; i < a; ++i) {
+            double z = SerialReader();
+            double p = SerialReader();  // no guarantee that p is 0
+            c->focontrollers[i] = IIRFirstOrderController(z, p);
+            c->real_g *= c->focontrollers[i].a;
+        }
+        // last controller is always a single pole at -1/2
+        for (; i < (b - 1); ++i, ++j) {
+            double p = SerialReader();
+            c->spcontrollers[j] = IIRSinglePoleController(p);
+            c->real_g *= c->spcontrollers[j].a;
+        }
         c->real_g *= c->spcontrollers[j].a;
     }
-    c->real_g *= c->spcontrollers[j].a;
     // new overall gain
     c->overall_gain = (double)SerialReader();
     Serial.printf("overall_gain %f\n", c->overall_gain);

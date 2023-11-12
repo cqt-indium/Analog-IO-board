@@ -12,6 +12,7 @@ void ReferencePath::clear_timer() {
 
 void ReferencePath::clear_reference() {
     cur_slice = 0;
+    trigged = false;
 }
 
 bool ReferencePath::is_terminated() const {
@@ -22,7 +23,7 @@ double ReferencePath::get_reference() {
     if (trigged) {
         trigged = false;  // clear trigger flag
         if (timer > 30) {
-            timer = 0;
+            timer = 1;
             cur_slice += 1;
             cur_slice %= tot;
         }

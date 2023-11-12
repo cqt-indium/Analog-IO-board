@@ -1,5 +1,5 @@
 #include "analog_io.h"
-#include "fsm2.h"
+#include "fsm.h"
 #include "serial_reader.hpp"
 #include "servo/controllers/iir_controller.hpp"
 #include "servo/intensity_servo_helper.hpp"
@@ -23,17 +23,23 @@ static Triggers next_trig = Triggers::Heartbeat;
 
 static void servo_loop() {
     if (digitalReadFast(GLOBAL_ENABLE_PIN)) {
-        for (int ch = 0; ch < 4; ++ch)
-            if (servoes[ch]->on) {
-                auto x = servoes[ch]->reference_hsp->get_reference();
-                servoes[ch]->writer(x);
-            }
-        return;
+        // for (int ch = 0; ch < 4; ++ch)
+        auto const ch = 0; 
+        if (servoes[ch]->on) {
+            auto x = servoes[ch]->reference_hsp->get_reference();
+            servoes[ch]->writer(x);
+        }
     }
-    for (int ch = 0; ch < 4; ++ch) {
-        if (servoes[ch]->on)
-            servoes[ch]->update();
+    else {
+        if(servoes[0]->on)
+            servoes[0]->update();
     }
+    if(servoes[1]->on)
+        servoes[1]->update(); 
+    // for (int ch = 0; ch < 4; ++ch) {
+    //     if (servoes[ch]->on)
+    //         servoes[ch]->update();
+    // }
 }
 static Controller* sweep_c;
 
@@ -66,7 +72,7 @@ void handle_serial() {
         default: {
             servoes[ch]->read_from_serial(c);
             // delay for continuous update
-            delay(4);
+            delay(10);
             if (Serial.available())
                 next_trig = Triggers::SerialEvent;
             else {

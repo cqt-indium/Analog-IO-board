@@ -4,7 +4,6 @@ import struct
 
 ser = setup_arduino_port('COM21')
 
-
 def readback():
     while not ser.in_waiting:
         time.sleep(.1)
@@ -19,6 +18,10 @@ def readback_val():
         mess_buffer += [ser.readline()]
     return mess_buffer
 
+def read_forever():
+    while True:
+        readback() 
+
 @arduino_transaction(ser)
 def sweep(ch, lower, upper, step):
     ser.write(struct.pack("<BBhhH", 1, ch, lower, upper, step))
@@ -26,14 +29,21 @@ def sweep(ch, lower, upper, step):
 
 @arduino_transaction(ser)
 def sweep_r(ch, lower, upper, step):
-    ser.write(struct.pack("<BBhhH", 1, ch, lower, upper, step))
+    ser.write(struct.pack("<BBHHH", 1, ch, lower, upper, step))
+    # read_forever()
     return readback_val()
 
 @arduino_transaction(ser)
-def servo(ch, fi, g, wfm):
-    ser.write(struct.pack("<BBddd", 2, ch, fi, 0, g))
+def servo(ch, kp, ki, wfm):
+    ser.write(struct.pack("<BBdd", 2, ch, kp, ki))
     ser.write(wfm)
     readback()
+
+# @arduino_transaction(ser)
+# def servo(ch, fi, g, wfm):
+#     ser.write(struct.pack("<BBddd", 2, ch, fi, 0, g))
+#     ser.write(wfm)
+#     readback()
 
 @arduino_transaction(ser)
 def ref(ch, wfm):
