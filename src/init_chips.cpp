@@ -1,7 +1,5 @@
 #include "init_chips.hpp"
-
 #include <SPI.h>
-
 #include "init_adc.hpp"
 #include "pin_assignment.h"
 #include "utilities.hpp"

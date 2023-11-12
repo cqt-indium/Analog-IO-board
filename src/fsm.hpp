@@ -1,5 +1,5 @@
 #include "analog_io.h"
-#include "fsm2.h"
+#include "fsm.h"
 #include "serial_reader.hpp"
 #include "servo/controllers/iir_controller.hpp"
 #include "servo/intensity_servo_helper.hpp"

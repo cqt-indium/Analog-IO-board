@@ -47,7 +47,15 @@ def check_file_in_arg(f):
 
 @check_file_in_arg
 def servo_p_action(args, max_pd, min_pd):
-    servo(args.ch, args.kp, args.ki, tran_wfm(
+    # wrong format f_I
+    try:
+        f = float(eval(args.f_I.strip('"')))
+    except (SyntaxError, NameError, TypeError) as e:
+        print('%s: %s' % (e.__class__.__name__,  e))
+        return
+    if f > 0:
+        f = -f
+    servo(args.ch, f, args.G, tran_wfm(
         args.fname, max_pd[args.ch], min_pd[args.ch]))
 
 @check_file_in_arg
@@ -56,7 +64,15 @@ def ref_p_action(args, max_pd, min_pd):
 
 @check_file_in_arg
 def servo_action(args):
-    servo(args.ch,  args.kp, args.ki, args.G, get_wfm(args.fname))
+    # wrong format f_I
+    try:
+        f = float(eval(args.f_I.strip('"')))
+    except (SyntaxError, NameError, TypeError) as e:
+        print('%s: %s' % (e.__class__.__name__,  e))
+        return
+    if f > 0:
+        f = -f
+    servo(args.ch, f, args.G, get_wfm(args.fname))
 
 @check_file_in_arg
 def ref_action(args):
@@ -106,15 +122,9 @@ sweep_parser = subparsers.add_parser(
 sweep_parser.add_argument('ch', type=int, choices=[
                           0, 1, 2, 3], help='Channel number')
 sweep_parser.add_argument('--lower', type=int, required=False,
-<<<<<<< HEAD
-                          default=32768, help='Lower limit of DAC number. Default is 32768. ')
-sweep_parser.add_argument('--upper', type=int, required=False,
-                          default=34300, help='Upper limit of DAC number. Default is 34300')
-=======
                           default=0, help='Lower limit of DAC number. Default is 0. ')
 sweep_parser.add_argument('--upper', type=int, required=False,
                           default=1500, help='Upper limit of DAC number. Default is 1500')
->>>>>>> helm_odt_servo
 sweep_parser.add_argument('--step', type=int, required=False,
                           default=1, help='Step size of sweep. Default is 1')
 sweep_parser.add_argument(
@@ -127,13 +137,9 @@ servo_parser = subparsers.add_parser(
     "servo", description="Start PI servo", add_help=False, )
 servo_parser.add_argument('ch', type=int, choices=[
                           0, 1, 2, 3], help='Channel number')
-# servo_parser.add_argument('f_I', metavar='f_I', type=str,
-#                           help='I corner in the unit of Nyquist frequency.')
-# servo_parser.add_argument('G', metavar='G', type=float, help='Overall gain')
-
-servo_parser.add_argument('kp', metavar='kp', type=float,
+servo_parser.add_argument('f_I', metavar='f_I', type=str,
                           help='I corner in the unit of Nyquist frequency.')
-servo_parser.add_argument('ki', metavar='ki', type=float, help='Overall gain')
+servo_parser.add_argument('G', metavar='G', type=float, help='Overall gain')
 servo_parser.add_argument('fname', metavar='fname',
                           type=str, help='Reference waveform file')
 servo_parser.add_argument('-r', help='Raw if set', action='store_true')

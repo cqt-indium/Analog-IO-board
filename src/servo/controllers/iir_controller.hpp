@@ -9,8 +9,9 @@ struct IIRBaseController {
     float le, lo;  // last error and last output
     IIRBaseController() : le{}, lo{} {}
     void clear() {
-        le = 0;
-        lo = 0;
+        // clear last error and output
+        le = 0.f;
+        lo = 0.f;
     }
     virtual float transfer(float const err) = 0;
     virtual void show() = 0;
@@ -41,7 +42,6 @@ struct IIRFirstOrderController : public IIRBaseController {
     IIRFirstOrderController() : z(0), p(0) {}
     float transfer(float const e) override {
         float ret = (a * lo - b * le + e);
-        ret = max(min(ret, 32767.), -32768.);
         lo = ret;
         le = e;
         return ret;
@@ -67,7 +67,6 @@ struct IIRSinglePoleController : public IIRBaseController {
     }
     float transfer(float const e) override {
         float ret = (b * lo + (le + e));
-        ret = max(min(ret, 32767.), -32768.);
         lo = ret;
         le = e;
         return ret;
@@ -161,7 +160,7 @@ struct IIRCascadeController : public Controller {
         }
     }
 
-    void clear() {
+    void clear() override {
         int i = 0, j = 0;
         for (; i < len_zeroes; ++i) focontrollers[i].clear();
         for (; i < len_poles; ++i, ++j) spcontrollers[j].clear();
@@ -200,20 +199,22 @@ void show_parser(IIRCascadeController<a, b>* c) {
 template <int a, int b>
 void servo_parser(IIRCascadeController<a, b>* c) {
     int i = 0, j = 0;
-    c->real_g = 1;
-    for (; i < a; ++i) {
-        double z = SerialReader();
-        double p = SerialReader();  // no guarantee that p is 0
-        c->focontrollers[i] = IIRFirstOrderController(z, p);
-        c->real_g *= c->focontrollers[i].a;
-    }
-    // last controller is always a single pole at -1/2
-    for (; i < (b - 1); ++i, ++j) {
-        double p = SerialReader();
-        c->spcontrollers[j] = IIRSinglePoleController(p);
+    if (a > 0 || b > 0){
+        c->real_g = 1;
+        for (; i < a; ++i) {
+            double z = SerialReader();
+            double p = SerialReader();  // no guarantee that p is 0
+            c->focontrollers[i] = IIRFirstOrderController(z, p);
+            c->real_g *= c->focontrollers[i].a;
+        }
+        // last controller is always a single pole at -1/2
+        for (; i < (b - 1); ++i, ++j) {
+            double p = SerialReader();
+            c->spcontrollers[j] = IIRSinglePoleController(p);
+            c->real_g *= c->spcontrollers[j].a;
+        }
         c->real_g *= c->spcontrollers[j].a;
     }
-    c->real_g *= c->spcontrollers[j].a;
     // new overall gain
     c->overall_gain = (double)SerialReader();
     Serial.printf("overall_gain %f\n", c->overall_gain);

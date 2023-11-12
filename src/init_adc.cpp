@@ -1,8 +1,6 @@
 #include "init_adc.hpp"
-
 #include <SPI.h>
 #include <stdint.h>
-
 #include "bit_mangler.h"
 #include "init_chips.hpp"
 #include "pin_assignment.h"
