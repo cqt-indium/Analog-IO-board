@@ -14,8 +14,8 @@
       "coreStrategy": "copy",
       "stdLib": "newlib",
       "sharedLibraries": [
-        "analog_io"
       ],
+      "projectLibraries": [],
       "board": {
         "name": "Teensy 4.1",
         "options": {
