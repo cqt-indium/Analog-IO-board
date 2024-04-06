@@ -13,6 +13,12 @@
 #include <Arduino.h>
 
 /**
+ * @brief Initialize chips. 
+ * 
+ * @note Must be called at the beginning of the program. 
+ */
+void init_chips(); 
+/**
  * \name Analog Read
  * @{
  */

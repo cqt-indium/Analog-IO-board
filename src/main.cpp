@@ -1,13 +1,16 @@
 #include "analog_io/analog_io.h"
-void init_chips();
+
 void setup() {
     init_chips();
     while (!Serial)
         ;
     Serial.begin(115200);
-    delay(200);
-    pinMode(40, OUTPUT);
 }
 
 void loop() {
+    analogio_write(0, 32768);
+    analogio_read(AIN0);
+
+    Serial.println("Hello world!");
+    delay(1000);
 }
