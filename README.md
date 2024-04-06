@@ -61,7 +61,7 @@ Teensy core built successfully
 
 USER [CPP] SPI.cpp 
 
-[LD]  .vsteensy/build/blank_io.elf
+[LD]  .vsteensy/build/v1.0.elf
 Memory region         Used Size  Region Size  %age Used
             ITCM:       15436 B       512 KB      2.94%
             DTCM:        6688 B       512 KB      1.28%
@@ -86,7 +86,7 @@ After you pass all the steps, submit your answer to the following questions to T
 
 - Q0: What is this program, `main.cpp`, about? Can you explain what is going on in each line? 
 - Q1: Where does the compiled files go? 
-- Q2: After compilation, the target (executable like `.elf`) is named `blink_io` at the output. Can you change the name into `hello_world`? 
+- Q2: After compilation, the target (executable like `.elf`) is named `v1.0` at the output. Can you change the name into `hello_world`? 
 - Q3: What is the purpose of the `core` folder? What does it include? 
 - Q4: How does the `makefile` find out the compiler? Can you write down the absolute path of the `gcc`-like compiler used? 
 - Q5: Suppose this project needed to be uploaded from a different computer (indium desktop 3, for instance), which part of `makefile` needs to change? 
