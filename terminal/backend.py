@@ -2,11 +2,7 @@ from ports import setup_arduino_port, arduino_transaction
 import time
 import struct
 
-<<<<<<< HEAD
 ser = setup_arduino_port('COM20')
-=======
-ser = setup_arduino_port('COM21')
->>>>>>> helm_odt_servo
 
 def readback():
     while not ser.in_waiting:

@@ -7,7 +7,7 @@
 #ifndef WRITE_HPP
 #define WRITE_HPP
 
-#include <SPI.h>
+#include <stdint.h>
 
 /**
  * @brief Write num to channel ch

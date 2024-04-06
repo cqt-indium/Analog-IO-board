@@ -9,8 +9,6 @@
 
 #include <stdint.h>
 
-#include "init_chips.hpp"
-
 /**
  * @name ADC reader functions
  *

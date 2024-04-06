@@ -10,9 +10,10 @@
 #ifndef ANALOG_IO_H
 #define ANALOG_IO_H
 
-#include "init_chips.hpp"
+#include <Arduino.h>
 #include "read.hpp"
 #include "write.hpp"
+#define ADC_FOUR_CHANNEL
 
 /**
  * \name Analog Read
