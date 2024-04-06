@@ -1,0 +1,41 @@
+{
+  "tasks": [
+    {
+      "label": "Build",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "command": "./bin/make.exe",
+      "args": [
+        "all",
+        "-j",
+        "-Otarget"
+      ]
+    },
+    {
+      "label": "Clean",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "command": "./bin/make.exe",
+      "args": [
+        "clean"
+      ]
+    },
+    {
+      "label": "Upload (teensy.exe)",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "command": "./bin/make.exe",
+      "args": [
+        "upload",
+        "-j",
+        "-Otarget"
+      ]
+    }
+  ]
+}
