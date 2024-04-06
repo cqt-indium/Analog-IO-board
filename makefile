@@ -17,7 +17,7 @@ BOARD_ID         := TEENSY41
 
 MCU              := imxrt1062
 
-LIBS_SHARED_BASE := C:\Users\Administrator\Documents\Arduino\libraries
+LIBS_SHARED_BASE :=  
 LIBS_SHARED      :=  
 
 LIBS_LOCAL_BASE  := lib
