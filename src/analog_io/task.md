@@ -19,11 +19,20 @@ Moreover, the following extensions are recommended:
 
 ## Steps:
 
-1. Find out the folder `blank_io`. Copy it to the desired location. For the moment, you can copy it to the desktop with a name `blank_io_<yyyymmdd>` and replace `<yyyymmdd>` with the date (e.g., 20240326). 
+1. Clone the repository from Github.  
+```
+git clone https://github.com/cqt-indium/Analog-IO-board.git
+``` 
 
-2. Open folder `blank_io_<yyyymmdd>` and this is the root folder of this project, meaning every code change happens inside this folder. 
+2. Open it with VS code. This is the root folder of this project, meaning every code change happens inside this folder. 
+```
+code Analog-IO-board 
+```
 
-3. In Windows Explorer, press down `<shift>` button and then right click. Click `Open with Code`. 
+3. Press `<ctrl>+<shift>+~` to toggle a new terminal and checkout the branch for this task. 
+```
+git checkout blink-io
+```
 
 4. Navigate to `src/main.cpp`. Confirm the file contents is as follows. If not, this means the original folder is corrupted and you should ask Travis for help.  
 ```
