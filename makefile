@@ -197,11 +197,11 @@ $(LIB_BIN)/%.s.o: $(LIBS_SHARED_BASE)/%.S
 
 $(LIB_BIN)/%.cpp.o: $(LIBS_SHARED_BASE)/%.cpp
 	@echo $(COL_LIB)LIB [CPP] $(notdir $<) $(COL_ERR)
-	@"$(CXX)" $(CPP_FLAGS) $(INCLUDE) -o $@ -c $< -l./src/analog_io/analog_io.a
+	@"$(CXX)" $(CPP_FLAGS) $(INCLUDE) -o $@ -c $< 
 
 $(LIB_BIN)/%.c.o: $(LIBS_SHARED_BASE)/%.c
 	@echo $(COL_LIB)LIB [CC]  $(notdir $<) $(COL_ERR)
-	@"$(CC)" $(C_FLAGS) $(INCLUDE) -o $@ -c $< -l./src/analog_io/analog_io.a
+	@"$(CC)" $(C_FLAGS) $(INCLUDE) -o $@ -c $< 
 
 # Local Libraries -------------------------------------------------------------
 $(LIB_BIN)/%.s.o: $(LIBS_LOCAL_BASE)/%.S
@@ -227,14 +227,15 @@ $(USR_BIN)/%.c.o: $(USR_SRC)/%.c
 
 $(USR_BIN)/%.cpp.o: $(USR_SRC)/%.cpp
 	@echo $(COL_SRC)USER [CPP] $(notdir $<) $(COL_ERR)
-	@echo "$(CXX)" $(CPP_FLAGS) $(INCLUDE) -o "$@" -c $< ./src/analog_io/analog_io.a
+	@echo "$(CXX)" $(CPP_FLAGS) $(INCLUDE) -o "$@" -c $< 
 	@"$(CXX)" $(CPP_FLAGS) $(INCLUDE) -o "$@" -c $< 
 
 # Linking ---------------------------------------------------------------------
 $(TARGET_ELF): $(CORE_LIB) $(LIB_OBJ) $(USR_OBJ)
 	@echo $(COL_LINK)
 	@echo [LD]  $@ $(COL_ERR)
-	@$(CC) $(LD_FLAGS) -o "$@" $(USR_OBJ) $(LIB_OBJ) $(CORE_LIB) $(LIBS) ./src/analog_io/analog_io.a
+	@echo $(CC) $(LD_FLAGS) -o "$@" $(USR_OBJ) ./src/analog_io/analog_io.a  $(LIB_OBJ) $(CORE_LIB) $(LIBS) 
+	@$(CC) $(LD_FLAGS) -o "$@" $(USR_OBJ) ./src/analog_io/analog_io.a $(LIB_OBJ) $(CORE_LIB) $(LIBS) 
 	@echo $(COL_OK)User code built and linked to libraries &&echo.
 
 %.lst: %.elf
