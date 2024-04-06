@@ -234,7 +234,6 @@ $(USR_BIN)/%.cpp.o: $(USR_SRC)/%.cpp
 $(TARGET_ELF): $(CORE_LIB) $(LIB_OBJ) $(USR_OBJ)
 	@echo $(COL_LINK)
 	@echo [LD]  $@ $(COL_ERR)
-	@echo $(CC) $(LD_FLAGS) -o "$@" $(USR_OBJ) ./src/analog_io/analog_io.a  $(LIB_OBJ) $(CORE_LIB) $(LIBS) 
 	@$(CC) $(LD_FLAGS) -o "$@" $(USR_OBJ) ./src/analog_io/analog_io.a $(LIB_OBJ) $(CORE_LIB) $(LIBS) 
 	@echo $(COL_OK)User code built and linked to libraries &&echo.
 

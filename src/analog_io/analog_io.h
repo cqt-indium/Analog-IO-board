@@ -2,8 +2,8 @@
  * @file analog_io.h
  * @author Li Putian
  * @brief Master header for analog IO library
- * @version 0.1
- * @date 2023-09-11
+ * @version 0.3
+ * @date 2024-04-06
  *
  */
 
@@ -11,9 +11,6 @@
 #define ANALOG_IO_H
 
 #include <Arduino.h>
-#include "read.hpp"
-#include "write.hpp"
-#define ADC_FOUR_CHANNEL
 
 /**
  * \name Analog Read
@@ -56,11 +53,12 @@ uint16_t analogio_read(uint8_t const ch);
  */
 
 /**
- * @brief Alias of \link write.hpp async_write\endlink.
- *
- * @copydoc async_write
+ * @brief Write num to channel ch
+ * 
+ * @note ch has to be from {0, 1, 2, 3}
+ * 
  */
-extern decltype(async_write)& analogio_write;
+extern void (&analogio_write)(uint8_t const ch, uint16_t const num);
 // @}
 
 /**
