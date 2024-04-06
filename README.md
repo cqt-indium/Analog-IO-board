@@ -31,7 +31,7 @@ code Analog-IO-board
 
 3. Press `<ctrl>+<shift>+~` to toggle a new terminal and checkout the branch for this task. 
 ```
-git checkout blink-io
+git checkout blank-io
 ```
 
 4. Navigate to `src/main.cpp`. Confirm the file contents is as follows. If not, this means the original folder is corrupted and you should ask Travis for help.  
